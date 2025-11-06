@@ -2,11 +2,16 @@
 
 NestJS 專案模板，提供開箱即用的身份驗證、用戶管理、角色權限控制等核心功能，可快速開始新的後端專案
 
-**快速開發上手提示**：
+**快速執行開發環境**：
 
 1. 執行 `npm run dev`
 2. 訪問 http://localhost:3000/apidoc 查看 Swagger 文檔
 3. 測試使用預設管理員帳號 `admin001 / 000000` 登入
+
+**快速執行生產環境**
+
+1. 編輯 .env
+2. 執行 `npm run deploy`
 
 ## 特色功能
 
@@ -51,10 +56,6 @@ cp .env.example .env
 # 編輯 .env，設定資料庫連線和 JWT 密鑰等等資訊
 vim .env
 ```
-
-**需要第三方服務 API Key？**
-如需使用 Gmail、TapPay、LinePay、Google Maps 等服務，請參考：
-📖 [第三方 API Key 申請指南](./docs/API_KEYS_SETUP.md)
 
 ### 3. 是否啟用通知相關功能
 
