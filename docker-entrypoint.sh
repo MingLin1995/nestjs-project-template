@@ -13,6 +13,6 @@ echo "Running database migrations..."
 npx prisma migrate deploy
 
 echo "Running database seed..."
-npm run prisma:seed || echo "Seed skipped or failed"
+npm run prisma:seed:prod || echo "Seed skipped or failed"
 
 exec "$@"

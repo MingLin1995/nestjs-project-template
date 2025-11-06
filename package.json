@@ -29,6 +29,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:seed:prod": "node dist/prisma/seed.js",
     "setup": "node scripts/setup.js"
   },
   "dependencies": {
