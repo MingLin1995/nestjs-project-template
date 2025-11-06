@@ -23,11 +23,11 @@ RUN addgroup -g 1001 -S nodejs && \
 RUN apk add --no-cache netcat-openbsd
 
 COPY --chown=nestjs:nodejs package*.json ./
-RUN npm ci --only=production && npm cache clean --force
 
 # 複製建置結果和其他必要檔案
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 
 # 複製 entrypoint script
 COPY --chown=nestjs:nodejs docker-entrypoint.sh /usr/local/bin/

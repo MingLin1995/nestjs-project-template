@@ -8,10 +8,6 @@ while ! nc -z db 5432; do
 done
 echo "Database is ready!"
 
-# Generate Prisma Client
-echo "Generating Prisma Client..."
-npx prisma generate
-
 # Run migrations
 echo "Running database migrations..."
 npx prisma migrate deploy
