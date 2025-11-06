@@ -14,8 +14,8 @@ fi
 
 # 停止舊的容器
 echo "Stopping old containers..."
-docker-compose -f docker-compose.dev.yml down
+docker compose -f docker-compose.dev.yml down
 
 # 建置並啟動
 echo "Building and starting containers..."
-docker-compose -f docker-compose.dev.yml up --build
+docker compose -f docker-compose.dev.yml up --build

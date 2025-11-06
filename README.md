@@ -211,13 +211,13 @@ async login(@Body() loginDto: LoginDto) {
 2. 執行 migration：
 
 ```bash
-docker-compose -f docker-compose.dev.yml exec app npm run prisma:migrate
+docker compose -f docker-compose.dev.yml exec app npm run prisma:migrate
 ```
 
 3. 重啟服務：
 
 ```bash
-docker-compose -f docker-compose.dev.yml restart app
+docker compose -f docker-compose.dev.yml restart app
 ```
 
 ## Docker 指令
@@ -238,7 +238,7 @@ npm run docker:dev:down
 npm run docker:dev:logs
 
 # 進入容器
-docker-compose -f docker-compose.dev.yml exec app sh
+docker compose -f docker-compose.dev.yml exec app sh
 ```
 
 ### 生產環境
@@ -248,13 +248,13 @@ docker-compose -f docker-compose.dev.yml exec app sh
 ./deploy.sh
 
 # 或手動執行
-docker-compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml up -d --build
 
 # 停止服務
-docker-compose -f docker-compose.yml down
+docker compose -f docker-compose.yml down
 
 # 查看 logs
-docker-compose -f docker-compose.yml logs -f app
+docker compose -f docker-compose.yml logs -f app
 ```
 
 ## 開發工作流程
@@ -265,13 +265,13 @@ docker-compose -f docker-compose.yml logs -f app
 
 ```bash
 # 1. 使用 NestJS CLI 建立模組
-docker-compose -f docker-compose.dev.yml exec app nest g module orders
-docker-compose -f docker-compose.dev.yml exec app nest g service orders
-docker-compose -f docker-compose.dev.yml exec app nest g controller orders
+docker compose -f docker-compose.dev.yml exec app nest g module orders
+docker compose -f docker-compose.dev.yml exec app nest g service orders
+docker compose -f docker-compose.dev.yml exec app nest g controller orders
 
 # 2. 編輯 prisma/schema.prisma 新增資料表
 # 3. 執行 migration
-docker-compose -f docker-compose.dev.yml exec app npm run prisma:migrate
+docker compose -f docker-compose.dev.yml exec app npm run prisma:migrate
 
 # 4. 在 app.module.ts 匯入模組
 ```
@@ -330,7 +330,7 @@ SMTP_PASS=your-app-password
 
 ### JWT 密鑰
 
-**⚠️ 重要**：生產環境務必更換 `JWT_SECRET`：
+**重要**：生產環境務必更換 `JWT_SECRET`：
 
 ```bash
 # 生成隨機密鑰
@@ -350,25 +350,25 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 **開發環境**：
 
 ```bash
-docker-compose -f docker-compose.dev.yml exec app npx prisma migrate reset
+docker compose -f docker-compose.dev.yml exec app npx prisma migrate reset
 # 會刪除所有資料、重新執行 migrations、執行 seed
 ```
 
-**⚠️ 生產環境**：不建議重置，請使用 migration 逐步更新
+**生產環境**：不建議重置，請使用 migration 逐步更新
 
 ### Q2: 修改 .env 後沒有生效？
 
 容器需要重啟才能讀取新的環境變數：
 
 ```bash
-docker-compose -f docker-compose.dev.yml restart app
+docker compose -f docker-compose.dev.yml restart app
 ```
 
 ### Q3: Prisma Client 找不到？
 
 ```bash
-docker-compose -f docker-compose.dev.yml exec app npm run prisma:generate
-docker-compose -f docker-compose.dev.yml restart app
+docker compose -f docker-compose.dev.yml exec app npm run prisma:generate
+docker compose -f docker-compose.dev.yml restart app
 ```
 
 ### Q4: 如何新增管理員帳號？

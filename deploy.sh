@@ -14,11 +14,10 @@ fi
 
 # 停止舊的容器
 echo "Stopping old containers..."
-docker-compose -f docker-compose.yml down
+docker compose -f docker-compose.yml down
 
 # 建置並啟動
 echo "Building and starting containers..."
-docker-compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml up -d --build
 
-echo "Check logs with: docker-compose -f docker-compose.yml logs -f app"
-s
+echo "Check logs with: docker compose -f docker-compose.yml logs -f app"
