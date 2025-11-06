@@ -208,10 +208,21 @@ async login(@Body() loginDto: LoginDto) {
 ### 修改資料庫結構
 
 1. 編輯 `prisma/schema.prisma`
+
 2. 執行 migration：
 
 ```bash
 docker compose -f docker-compose.dev.yml exec app npm run prisma:migrate
+```
+
+**或者直接在指令中指定 migration 名稱**：
+
+```bash
+# 指定 migration 名稱
+docker compose -f docker-compose.dev.yml exec app npx prisma migrate dev --name add_user_avatar
+
+# 建立 migration 但不執行
+docker compose -f docker-compose.dev.yml exec app npx prisma migrate dev --name add_order_table --create-only
 ```
 
 3. 重啟服務：
@@ -270,8 +281,9 @@ docker compose -f docker-compose.dev.yml exec app nest g service orders
 docker compose -f docker-compose.dev.yml exec app nest g controller orders
 
 # 2. 編輯 prisma/schema.prisma 新增資料表
+
 # 3. 執行 migration
-docker compose -f docker-compose.dev.yml exec app npm run prisma:migrate
+docker compose -f docker-compose.dev.yml exec app npx prisma migrate dev --name create_order_table
 
 # 4. 在 app.module.ts 匯入模組
 ```
