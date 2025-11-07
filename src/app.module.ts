@@ -10,8 +10,8 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { AppController } from './app.controller';
 // import { NotificationsModule } from './notifications/notifications.module';
 // 需要的套件：
-//   - Email: npm install @nestjs-modules/mailer nodemailer handlebars
-//   - LINE:  npm install @line/bot-sdk
+//   - Email: npm install @nestjs-modules/mailer@^2.0.1 nodemailer@^7.0.10
+//   - LINE:  npm install @line/bot-sdk@^9.5.0
 //   - SMS:   無需額外套件（使用內建 HttpModule）
 
 @Module({
@@ -28,12 +28,12 @@ import { AppController } from './app.controller';
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 60 ses
-        limit: 10,  // 10 requests
+        limit: 10, // 10 requests
       },
     ]),
     AuthModule,
     UsersModule,
-    // NotificationsModule
+    // NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

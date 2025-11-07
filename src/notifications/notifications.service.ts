@@ -53,6 +53,9 @@
 //             );
 //           }
 //           break;
+
+//         default:
+//           this.logger.warn(`Unknown notification channel: ${channel}`);
 //       }
 //     }
 

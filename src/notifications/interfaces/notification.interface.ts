@@ -3,8 +3,8 @@ export enum NotificationEvent {
 }
 
 export enum RecipientType {
-  ADMIN,
-  USER,
+  ADMIN = 'ADMIN',
+  USER = 'USER',
 }
 
 export enum NotificationChannel {

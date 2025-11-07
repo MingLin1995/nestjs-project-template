@@ -1,4 +1,5 @@
 // import { Injectable, Logger } from '@nestjs/common';
+// import { ConfigService } from '@nestjs/config';
 // import { NotificationService, NotificationPayload } from '../interfaces/notification.interface';
 // import { NotificationTemplateService } from '../templates/notification-template.service';
 // import { messagingApi } from '@line/bot-sdk';
@@ -8,9 +9,21 @@
 //   private readonly lineClient: messagingApi.MessagingApiClient;
 //   private readonly logger = new Logger(LineNotificationService.name);
 
-//   constructor(private readonly templateService: NotificationTemplateService) {
+//   constructor(
+//     private readonly templateService: NotificationTemplateService,
+//     private readonly configService: ConfigService,
+//   ) {
+//     const channelAccessToken = this.configService.get<string>('LINE_CHANNEL_ACCESS_TOKEN');
+
+//     if (!channelAccessToken) {
+//       throw new Error(
+//         'LINE_CHANNEL_ACCESS_TOKEN is not configured. ' +
+//           'Please set it in your .env file to enable LINE notifications.',
+//       );
+//     }
+
 //     this.lineClient = new messagingApi.MessagingApiClient({
-//       channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+//       channelAccessToken,
 //     });
 //   }
 
