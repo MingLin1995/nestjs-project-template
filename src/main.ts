@@ -4,12 +4,37 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import * as fs from 'fs';
 import * as path from 'path';
+import helmet from 'helmet';
 
 async function bootstrap() {
+  // JWT 密碼強度驗證
+  if (process.env.NODE_ENV === 'production') {
+    const jwtSecret = process.env.JWT_SECRET;
+    const weakSecrets = ['your-secret-key-change-this-in-production'];
+
+    if (!jwtSecret || weakSecrets.includes(jwtSecret) || jwtSecret.length < 32) {
+      throw new Error('生產環境必須更換 JWT_SECRET ！');
+    }
+  }
+
   const app = await NestFactory.create(AppModule);
 
-  // 啟用 CORS
-  //app.enableCors();
+  app.use(
+    helmet({
+      contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+    }),
+  );
+
+  // 是否啟用 CORS
+  if (process.env.ENABLE_CORS === 'true') {
+    const corsOrigins = process.env.CORS_ORIGINS?.split(',') || '*';
+    app.enableCors({
+      origin: corsOrigins,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'], // x-line-userId
+    });
+  }
 
   // 全域驗證管道
   app.useGlobalPipes(
