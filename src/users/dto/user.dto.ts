@@ -43,13 +43,13 @@ export class UpdateUserDto {
 
 export class UserResponseDto {
   @ApiProperty({ example: 'uuid-string' })
-  id: string;
+  id!: string;
 
   @ApiProperty({ example: 'admin001' })
-  account: string;
+  account!: string;
 
   @ApiProperty({ example: 'USER' })
-  role: string;
+  role!: string;
 
   @ApiProperty({ example: 'user@example.com', required: false, nullable: true })
   email?: string;
@@ -61,8 +61,8 @@ export class UserResponseDto {
   lineUserId?: string;
 
   @ApiProperty()
-  createdAt: Date;
+  createdAt!: Date;
 
   @ApiProperty()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

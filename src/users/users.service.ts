@@ -2,6 +2,7 @@ import { Injectable, ConflictException, NotFoundException } from '@nestjs/common
 import { PrismaService } from 'nestjs-prisma';
 import { RegisterDto } from '../auth/dto/auth.dto';
 import { UpdateUserDto } from './dto/user.dto';
+import { Role } from '../common/decorators/roles.decorator';
 
 @Injectable()
 export class UsersService {
@@ -26,7 +27,7 @@ export class UsersService {
           where: { account: registerDto.account },
           data: {
             ...registerDto,
-            role: 'USER',
+            role: Role.USER,
             deletedAt: null,
             updatedAt: new Date(),
           },
@@ -39,7 +40,7 @@ export class UsersService {
     return this.prisma.user.create({
       data: {
         ...registerDto,
-        role: 'USER',
+        role: Role.USER,
       },
     });
   }

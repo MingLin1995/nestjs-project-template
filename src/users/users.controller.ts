@@ -3,6 +3,11 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiBody } from '@nes
 import { UsersService } from './users.service';
 import { UpdateUserDto, UserResponseDto } from './dto/user.dto';
 import { Roles, Role } from '../common/decorators/roles.decorator';
+import { RequestUser } from '../auth/interfaces/auth.interface';
+
+interface RequestWithUser {
+  user: RequestUser;
+}
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -17,7 +22,7 @@ export class UsersController {
     description: '取得當前用戶資訊成功',
     type: UserResponseDto,
   })
-  getProfile(@Request() req) {
+  getProfile(@Request() req: RequestWithUser) {
     return this.usersService.findOne(req.user.sub);
   }
 
@@ -29,7 +34,7 @@ export class UsersController {
     description: '更新當前用戶資訊成功',
     type: UserResponseDto,
   })
-  updateProfile(@Request() req, @Body() updateUserDto: UpdateUserDto) {
+  updateProfile(@Request() req: RequestWithUser, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(req.user.sub, updateUserDto);
   }
 

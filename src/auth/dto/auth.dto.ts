@@ -8,7 +8,7 @@ export class RegisterDto {
   })
   @IsString()
   @IsNotEmpty()
-  account: string;
+  account!: string;
 
   @ApiProperty({
     description: '密碼',
@@ -18,7 +18,7 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(6)
-  password: string;
+  password!: string;
 
   @ApiProperty({
     description: 'Email',
@@ -55,7 +55,7 @@ export class LoginDto {
   })
   @IsString()
   @IsNotEmpty()
-  account: string;
+  account!: string;
 
   @ApiProperty({
     description: '密碼',
@@ -63,7 +63,7 @@ export class LoginDto {
   })
   @IsString()
   @IsNotEmpty()
-  password: string;
+  password!: string;
 }
 
 export class AuthResponseDto {
@@ -71,7 +71,7 @@ export class AuthResponseDto {
     description: 'JWT access token',
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
-  accessToken: string;
+  accessToken!: string;
 
   @ApiProperty({
     description: '用戶資訊',
@@ -81,7 +81,7 @@ export class AuthResponseDto {
       role: { type: 'string', example: 'USER' },
     },
   })
-  user: {
+  user!: {
     id: string;
     role: string;
   };

@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { AuthenticatedUser, LoginResponse, JwtPayload } from './interfaces/auth.interface';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +12,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(loginDto: LoginDto): Promise<any> {
+  async validateUser(loginDto: LoginDto): Promise<AuthenticatedUser> {
     const user = await this.usersService.findByAccount(loginDto.account);
 
     if (!user) {
@@ -27,8 +28,8 @@ export class AuthService {
     return this.usersService.findOne(user.id);
   }
 
-  async login(user: any) {
-    const payload = {
+  async login(user: AuthenticatedUser): Promise<LoginResponse> {
+    const payload: JwtPayload = {
       sub: user.id,
       account: user.account,
       role: user.role,
@@ -38,12 +39,13 @@ export class AuthService {
       accessToken: this.jwtService.sign(payload),
       user: {
         id: user.id,
+        account: user.account,
         role: user.role,
       },
     };
   }
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto): Promise<LoginResponse> {
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
     const user = await this.usersService.create({
