@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from 'nestjs-prisma';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -24,12 +25,22 @@ import { AppController } from './app.controller';
         explicitConnect: true,
       },
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 60 ses
+        limit: 10,  // 10 requests
+      },
+    ]),
     AuthModule,
     UsersModule,
     // NotificationsModule
   ],
   controllers: [AppController],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
