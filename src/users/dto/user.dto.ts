@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional, IsEmail, MinLength } from 'class-validator';
+import { PaginationMetaDto } from '../../common/dto/paginated-response.dto';
 
 export class UpdateUserDto {
   @ApiProperty({
@@ -45,7 +46,7 @@ export class UserResponseDto {
   @ApiProperty({ example: 'uuid-string' })
   id!: string;
 
-  @ApiProperty({ example: 'admin001' })
+  @ApiProperty({ example: 'user001' })
   account!: string;
 
   @ApiProperty({ example: 'USER' })
@@ -65,4 +66,12 @@ export class UserResponseDto {
 
   @ApiProperty()
   updatedAt!: Date;
+}
+
+export class PaginatedUserResponseDto {
+  @ApiProperty({ type: [UserResponseDto], description: '用戶列表' })
+  data!: UserResponseDto[];
+
+  @ApiProperty({ type: PaginationMetaDto, description: '分頁元數據' })
+  meta!: PaginationMetaDto;
 }

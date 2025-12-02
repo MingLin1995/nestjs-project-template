@@ -1,8 +1,11 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
+import { Prisma } from '@prisma/client';
 import { RegisterDto } from '../auth/dto/auth.dto';
 import { UpdateUserDto } from './dto/user.dto';
 import { Role } from '../common/decorators/roles.decorator';
+import { UserQueryDto } from './dto/user-query.dto';
+import { calculatePagination, createPaginatedResponse } from '../common/utils/pagination.helper';
 
 @Injectable()
 export class UsersService {
@@ -61,13 +64,49 @@ export class UsersService {
     return user;
   }
 
-  async findAll() {
-    return this.prisma.user.findMany({
-      where: {
-        deletedAt: null,
-      },
-      omit: { password: true },
-    });
+  async findAll(queryDto: UserQueryDto) {
+    const { skip, take } = calculatePagination(queryDto);
+    const page = queryDto.page ?? 1;
+    const limit = queryDto.limit ?? 10;
+
+    const where: Prisma.UserWhereInput = {
+      deletedAt: null,
+      // 帳號搜尋（模糊搜尋，不區分大小寫）
+      ...(queryDto.account && {
+        account: {
+          contains: queryDto.account,
+          mode: 'insensitive',
+        },
+      }),
+      // Email 搜尋（模糊搜尋，不區分大小寫）
+      ...(queryDto.email && {
+        email: {
+          contains: queryDto.email,
+          mode: 'insensitive',
+        },
+      }),
+      // 電話搜尋（模糊搜尋）
+      ...(queryDto.phone && {
+        phone: {
+          contains: queryDto.phone,
+        },
+      }),
+      // 角色篩選
+      ...(queryDto.role && { role: queryDto.role }),
+    };
+
+    const [data, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip,
+        take,
+        omit: { password: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return createPaginatedResponse(data, page, limit, total);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {

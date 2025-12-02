@@ -1,7 +1,8 @@
-import { Controller, Get, Body, Patch, Param, Delete, Request } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, Request, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { UpdateUserDto, UserResponseDto } from './dto/user.dto';
+import { UpdateUserDto, UserResponseDto, PaginatedUserResponseDto } from './dto/user.dto';
+import { UserQueryDto } from './dto/user-query.dto';
 import { Roles, Role } from '../common/decorators/roles.decorator';
 import { RequestUser } from '../auth/interfaces/auth.interface';
 
@@ -40,15 +41,18 @@ export class UsersController {
 
   @Get()
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: '取得所有用戶列表（ADMIN）' })
+  @ApiOperation({
+    summary: '取得所有用戶列表（ADMIN）',
+    description: '支援分頁和搜尋功能。可依帳號、Email、電話、角色進行篩選。',
+  })
   @ApiResponse({
     status: 200,
     description: '取得所有用戶列表成功',
-    type: [UserResponseDto],
+    type: PaginatedUserResponseDto,
   })
   @ApiResponse({ status: 403, description: '無權限執行此操作' })
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() queryDto: UserQueryDto) {
+    return this.usersService.findAll(queryDto);
   }
 
   @Get(':id')
