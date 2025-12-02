@@ -78,11 +78,13 @@ export class AuthResponseDto {
     type: 'object',
     properties: {
       id: { type: 'string', example: 'uuid-string' },
+      account: { type: 'string', example: 'user001' },
       role: { type: 'string', example: 'USER' },
     },
   })
   user!: {
     id: string;
+    account: string;
     role: string;
   };
 }
