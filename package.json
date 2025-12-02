@@ -30,7 +30,10 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:seed:prod": "node dist/prisma/seed.js",
-    "setup": "node scripts/setup.js"
+    "setup": "node scripts/setup.js",
+    "ver:major": "npm version major",
+    "ver:minor": "npm version minor",
+    "ver:patch": "npm version patch"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
