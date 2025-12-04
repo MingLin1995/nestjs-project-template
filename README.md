@@ -96,38 +96,71 @@ nestjs-project-template/
 │   ├── app.module.ts              # 主模組
 │   │
 │   ├── auth/                      # 身份驗證模組
-│   │   ├── auth.service.ts        # 登入/註冊邏輯
-│   │   ├── auth.controller.ts     # POST /auth/login, /auth/register
+│   │   ├── auth.controller.ts     # 登入/註冊邏輯
+│   │   ├── auth.module.ts         # 身份驗證模組定義
+│   │   ├── auth.service.ts        # 登入/註冊業務邏輯
 │   │   ├── jwt-auth.guard.ts      # JWT 全域守衛
-│   │   └── jwt.strategy.ts        # Passport JWT 策略
+│   │   ├── jwt.strategy.ts        # Passport JWT 策略
+│   │   ├── dto/                   # 資料傳輸物件
+│   │   │   └── auth.dto.ts
+│   │   └── interfaces/            # 身份驗證相關介面
+│   │       └── auth.interface.ts
 │   │
 │   ├── users/                     # 用戶管理模組
+│   │   ├── users.controller.ts    # 用戶相關 API 端點
+│   │   ├── users.module.ts        # 用戶模組定義
 │   │   ├── users.service.ts       # 用戶 CRUD（含軟刪除）
-│   │   ├── users.controller.ts    # GET/PATCH /users/me, /users/:id
-│   │   └── dto/user.dto.ts
+│   │   └── dto/                   # 資料傳輸物件
+│   │       ├── user-query.dto.ts
+│   │       └── user.dto.ts
 │   │
 │   ├── common/                    # 共用資源
-│   │   ├── decorators/
+│   │   ├── decorators/            # 自定義裝飾器
 │   │   │   ├── public.decorator.ts   # @Public() - 跳過 JWT
 │   │   │   └── roles.decorator.ts    # @Roles() - 角色權限
-│   │   └── guards/
-│   │       └── roles.guard.ts        # 角色權限守衛
+│   │   ├── dto/                   # 共用資料傳輸物件
+│   │   │   ├── paginated-response.dto.ts
+│   │   │   └── pagination.dto.ts
+│   │   ├── filters/               # 例外處理過濾器
+│   │   │   └── http-exception.filter.ts
+│   │   ├── guards/                # 守衛
+│   │   │   └── roles.guard.ts        # 角色權限守衛
+│   │   ├── interceptors/          # 攔截器
+│   │   │   └── logging.interceptor.ts
+│   │   ├── logger/                # 客戶端日誌服務
+│   │   │   ├── logger.module.ts
+│   │   │   └── logger.service.ts
+│   │   └── utils/                 # 共用工具函數
+│   │       ├── mask-sensitive.helper.ts
+│   │       └── pagination.helper.ts
+│   │
+│   ├── logs/                      # 系統日誌模組
+│   │   ├── logs.controller.ts
+│   │   ├── logs.module.ts
+│   │   ├── logs.service.ts
+│   │   └── dto/
+│   │       ├── log-query.dto.ts
+│   │       └── log-response.dto.ts
 │   │
 │   └── notifications/             # 通知模組（可選）
-│       ├── services/
+│       ├── notifications.module.ts
+│       ├── notifications.service.ts
+│       ├── interfaces/            # 通知相關介面
+│       │   └── notification.interface.ts
+│       ├── services/              # 各類通知服務
 │       │   ├── email-notification.service.ts
-│       │   ├── sms-notification.service.ts
-│       │   └── line-notification.service.ts
-│       └── templates/
+│       │   ├── line-notification.service.ts
+│       │   └── sms-notification.service.ts
+│       └── templates/             # 通知模板
 │
 ├── prisma/
 │   ├── schema.prisma              # 資料庫 Schema
 │   └── seed.ts                    # 種子資料（初始化管理員帳號）
 │
-├── docker-compose.dev.yml         # 開發環境
-├── docker-compose.yml             # 生產環境
-├── Dockerfile.dev                 # 開發環境映像檔
-├── Dockerfile.prod                # 生產環境映像檔
+├── docker-compose.dev.yml         # 開發環境 Docker Compose 配置
+├── docker-compose.yml             # 生產環境 Docker Compose 配置
+├── Dockerfile.dev                 # 開發環境 Dockerfile
+├── Dockerfile.prod                # 生產環境 Dockerfile
 ├── docker-entrypoint.sh           # 容器啟動腳本
 │
 └── .env.example                   # 環境變數範本
