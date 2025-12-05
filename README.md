@@ -4,14 +4,15 @@ NestJS 專案模板，提供開箱即用的身份驗證、用戶管理、角色�
 
 **快速執行開發環境**：
 
-1. 執行 `npm run dev`
+0. 安裝 Bun `curl -fsSL https://bun.sh/install | bash`
+1. 執行 `bun run dev`
 2. 訪問 http://localhost:3000/apidoc 查看 Swagger 文檔
 3. 測試使用預設管理員帳號 `admin001 / 000000` 登入
 
-**快速執行生產環境**
+**快速執行生產環境**：
 
 1. 編輯 .env
-2. 執行 `npm run deploy`
+2. 執行 `bun run deploy`
 
 ## 特色功能
 
@@ -27,6 +28,7 @@ NestJS 專案模板，提供開箱即用的身份驗證、用戶管理、角色�
 
 | 類別     | 技術                         |
 | -------- | ---------------------------- |
+| Runtime  | Bun 1.x                      |
 | 框架     | NestJS 10.x + TypeScript 5.x |
 | 資料庫   | PostgreSQL 15 + Prisma 6.x   |
 | 認證     | JWT + Passport               |
@@ -68,7 +70,7 @@ vim .env
 
 ```bash
 # 直接啟動（Docker 會自動處理依賴安裝）
-npm run dev
+bun run dev
 ```
 
 ### 5. 測試 API
@@ -246,17 +248,17 @@ async login(@Body() loginDto: LoginDto) {
 2. 執行 migration：
 
 ```bash
-docker compose -f docker-compose.dev.yml exec app npm run prisma:migrate
+docker compose -f docker-compose.dev.yml exec app bun run prisma:migrate
 ```
 
 **或者直接在指令中指定 migration 名稱**：
 
 ```bash
 # 指定 migration 名稱
-docker compose -f docker-compose.dev.yml exec app npx prisma migrate dev --name add_user_avatar
+docker compose -f docker-compose.dev.yml exec app bunx prisma migrate dev --name add_user_avatar
 
 # 建立 migration 但不執行
-docker compose -f docker-compose.dev.yml exec app npx prisma migrate dev --name add_order_table --create-only
+docker compose -f docker-compose.dev.yml exec app bunx prisma migrate dev --name add_order_table --create-only
 ```
 
 3. 重啟服務：
@@ -271,16 +273,16 @@ docker compose -f docker-compose.dev.yml restart app
 
 ```bash
 # 啟動所有服務
-npm run docker:dev
+bun run docker:dev
 
 # 重新建置並啟動
-npm run docker:dev:build
+bun run docker:dev:build
 
 # 停止服務
-npm run docker:dev:down
+bun run docker:dev:down
 
 # 查看 logs
-npm run docker:dev:logs
+bun run docker:dev:logs
 
 # 進入容器
 docker compose -f docker-compose.dev.yml exec app sh
@@ -317,7 +319,7 @@ docker compose -f docker-compose.dev.yml exec app nest g controller orders
 # 2. 編輯 prisma/schema.prisma 新增資料表
 
 # 3. 執行 migration
-docker compose -f docker-compose.dev.yml exec app npx prisma migrate dev --name create_order_table
+docker compose -f docker-compose.dev.yml exec app bunx prisma migrate dev --name create_order_table
 
 # 4. 在 app.module.ts 匯入模組
 ```
@@ -396,7 +398,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 **開發環境**：
 
 ```bash
-docker compose -f docker-compose.dev.yml exec app npx prisma migrate reset
+docker compose -f docker-compose.dev.yml exec app bunx prisma migrate reset
 # 會刪除所有資料、重新執行 migrations、執行 seed
 ```
 
@@ -413,7 +415,7 @@ docker compose -f docker-compose.dev.yml restart app
 ### Q3: Prisma Client 找不到？
 
 ```bash
-docker compose -f docker-compose.dev.yml exec app npm run prisma:generate
+docker compose -f docker-compose.dev.yml exec app bun run prisma:generate
 docker compose -f docker-compose.dev.yml restart app
 ```
 

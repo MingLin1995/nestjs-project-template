@@ -21,32 +21,32 @@ if [ "$NODE_ENV" = "development" ]; then
   echo "Development mode detected"
 
   echo "Generating Prisma Client..."
-  if ! npx prisma generate; then
+  if ! bunx prisma generate; then
     echo "ERROR: Prisma Client generation failed"
     exit 1
   fi
 
   echo "Running database migrations (dev mode)..."
-  if ! npx prisma migrate deploy; then
+  if ! bunx prisma migrate deploy; then
     echo "ERROR: Database migration failed"
     exit 1
   fi
 
   echo "Running database seed..."
-  npm run prisma:seed || echo "WARNING: Seed failed or was skipped (this is usually OK)"
+  bun run prisma:seed || echo "WARNING: Seed failed or was skipped (this is usually OK)"
 
 # 生產環境：執行 migration deploy
 else
   echo "Production mode detected"
 
   echo "Running database migrations..."
-  if ! npx prisma migrate deploy; then
+  if ! bunx prisma migrate deploy; then
     echo "ERROR: Database migration failed"
     exit 1
   fi
 
   echo "Running database seed..."
-  if ! npm run prisma:seed:prod; then
+  if ! bun run prisma:seed:prod; then
     echo "WARNING: Seed failed or was skipped (this is usually OK if database is already initialized)"
   fi
 fi
