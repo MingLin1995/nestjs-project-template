@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import * as fs from 'fs';
 import * as path from 'path';
 import helmet from 'helmet';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   // JWT 密碼強度驗證
@@ -17,7 +18,9 @@ async function bootstrap() {
     }
   }
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.set('trust proxy', true);
 
   app.use(
     helmet({
