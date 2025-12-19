@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import helmet from 'helmet';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
 
 async function bootstrap() {
   // JWT 密碼強度驗證
@@ -58,8 +59,13 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
+  const theme = new SwaggerTheme();
+  const darkCss = theme.getBuffer(SwaggerThemeNameEnum.NORD_DARK);
+  const customOptions = {
+    customCss: darkCss.toString(),
+  };
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('apidoc', app, document);
+  SwaggerModule.setup('apidoc', app, document, customOptions);
 
   const port = process.env.PORT || 3000; // 對內 port
   const appPort = process.env.APP_PORT || 3000; // 對外 port
