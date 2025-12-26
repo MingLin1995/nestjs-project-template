@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, ConsoleLogger } from '@nestjs/common';
-import { PrismaService } from 'nestjs-prisma';
+import { ExtendedPrismaService } from '../prisma/extended-prisma.service';
 import { safeStringify } from '../utils/mask-sensitive.helper';
 
 export enum LogLevel {
@@ -35,11 +35,11 @@ export interface LogOptions {
 
 @Injectable()
 export class LoggerService extends ConsoleLogger implements OnModuleInit {
-  constructor(private prisma: PrismaService) {
+  constructor(private prisma: ExtendedPrismaService) {
     super('LoggerService');
   }
 
-  onModuleInit() {}
+  onModuleInit() { }
 
   /**
    * 記錄日誌（存入資料庫 + Console 輸出）
@@ -97,7 +97,7 @@ export class LoggerService extends ConsoleLogger implements OnModuleInit {
 
   private async saveToDatabase(options: LogOptions): Promise<void> {
     try {
-      await this.prisma.systemLog.create({
+      await this.prisma.client.systemLog.create({
         data: {
           level: options.level,
           type: options.type,

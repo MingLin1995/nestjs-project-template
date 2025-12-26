@@ -1,9 +1,11 @@
 import { Controller, Get, Body, Patch, Param, Delete, Request, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UpdateUserDto, UserResponseDto, PaginatedUserResponseDto } from './dto/user.dto';
+import { MessageResponseDto } from '../common/dto/message-response.dto';
 import { UserQueryDto } from './dto/user-query.dto';
 import { Roles, Role } from '../common/decorators/roles.decorator';
+import { ApiOkResponseGeneric } from '../common/decorators/api-ok-response-generic.decorator';
 import { RequestUser } from '../auth/interfaces/auth.interface';
 
 interface RequestWithUser {
@@ -14,15 +16,11 @@ interface RequestWithUser {
 @ApiBearerAuth()
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Get('me')
   @ApiOperation({ summary: '取得當前用戶資訊' })
-  @ApiResponse({
-    status: 200,
-    description: '取得當前用戶資訊成功',
-    type: UserResponseDto,
-  })
+  @ApiOkResponseGeneric(UserResponseDto)
   getProfile(@Request() req: RequestWithUser) {
     return this.usersService.findOne(req.user.sub);
   }
@@ -30,11 +28,7 @@ export class UsersController {
   @Patch('me')
   @ApiOperation({ summary: '更新當前用戶資訊' })
   @ApiBody({ type: UpdateUserDto })
-  @ApiResponse({
-    status: 200,
-    description: '更新當前用戶資訊成功',
-    type: UserResponseDto,
-  })
+  @ApiOkResponseGeneric(UserResponseDto)
   updateProfile(@Request() req: RequestWithUser, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(req.user.sub, updateUserDto);
   }
@@ -45,12 +39,7 @@ export class UsersController {
     summary: '取得所有用戶列表（ADMIN）',
     description: '支援分頁和搜尋功能。可依帳號、Email、電話、角色進行篩選。',
   })
-  @ApiResponse({
-    status: 200,
-    description: '取得所有用戶列表成功',
-    type: PaginatedUserResponseDto,
-  })
-  @ApiResponse({ status: 403, description: '無權限執行此操作' })
+  @ApiOkResponseGeneric(PaginatedUserResponseDto)
   findAll(@Query() queryDto: UserQueryDto) {
     return this.usersService.findAll(queryDto);
   }
@@ -58,13 +47,8 @@ export class UsersController {
   @Get(':id')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: '取得特定用戶資訊（ADMIN）' })
-  @ApiResponse({
-    status: 200,
-    description: '取得特定用戶資訊成功',
-    type: UserResponseDto,
-  })
-  @ApiResponse({ status: 404, description: '用戶不存在' })
-  @ApiResponse({ status: 403, description: '無權限執行此操作' })
+  @ApiOkResponseGeneric(UserResponseDto)
+
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
@@ -73,13 +57,8 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: '更新特定用戶資訊（ADMIN）' })
   @ApiBody({ type: UpdateUserDto })
-  @ApiResponse({
-    status: 200,
-    description: '更新特定用戶資訊成功',
-    type: UserResponseDto,
-  })
-  @ApiResponse({ status: 404, description: '用戶不存在' })
-  @ApiResponse({ status: 403, description: '無權限執行此操作' })
+  @ApiOkResponseGeneric(UserResponseDto)
+
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
@@ -87,9 +66,7 @@ export class UsersController {
   @Delete(':id')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: '刪除用戶（ADMIN）' })
-  @ApiResponse({ status: 200, description: '刪除用戶成功' })
-  @ApiResponse({ status: 404, description: '用戶不存在' })
-  @ApiResponse({ status: 403, description: '無權限執行此操作' })
+  @ApiOkResponseGeneric(MessageResponseDto)
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }

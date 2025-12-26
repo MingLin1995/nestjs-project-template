@@ -10,7 +10,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async validateUser(loginDto: LoginDto): Promise<AuthenticatedUser> {
     const user = await this.usersService.findByAccount(loginDto.account);
@@ -46,12 +46,7 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto): Promise<LoginResponse> {
-    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-
-    const user = await this.usersService.create({
-      ...registerDto,
-      password: hashedPassword,
-    });
+    const user = await this.usersService.create(registerDto);
 
     return this.login(user);
   }

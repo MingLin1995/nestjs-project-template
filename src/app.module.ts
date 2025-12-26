@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { PrismaModule } from 'nestjs-prisma';
 import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -12,6 +12,9 @@ import { LoggerModule } from './common/logger/logger.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LogsModule } from './logs/logs.module';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { LogCleanupService } from './tasks/log-cleanup.service';
+import { PrismaModule } from './common/prisma/prisma.module';
 // import { NotificationsModule } from './notifications/notifications.module';
 // 需要的套件：
 //   - Email: npm install @nestjs-modules/mailer@^2.0.1 nodemailer@^7.0.10
@@ -23,18 +26,14 @@ import { LogsModule } from './logs/logs.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    PrismaModule.forRoot({
-      isGlobal: true,
-      prismaServiceOptions: {
-        explicitConnect: true,
-      },
-    }),
+    PrismaModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 60 ses
         limit: 10, // 10 requests
       },
     ]),
+    ScheduleModule.forRoot(),
     LoggerModule,
     AuthModule,
     UsersModule,
@@ -63,6 +62,11 @@ import { LogsModule } from './logs/logs.module';
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
     },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
+    },
+    LogCleanupService,
   ],
 })
-export class AppModule {}
+export class AppModule { }

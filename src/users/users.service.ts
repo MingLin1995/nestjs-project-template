@@ -1,36 +1,44 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'nestjs-prisma';
+import { ExtendedPrismaService } from '../common/prisma/extended-prisma.service';
 import { Prisma } from '@prisma/client';
 import { RegisterDto } from '../auth/dto/auth.dto';
 import { UpdateUserDto } from './dto/user.dto';
 import { Role } from '../common/decorators/roles.decorator';
+import * as bcrypt from 'bcrypt';
 import { UserQueryDto } from './dto/user-query.dto';
 import { calculatePagination, createPaginatedResponse } from '../common/utils/pagination.helper';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: ExtendedPrismaService) { }
   async findByAccount(account: string) {
-    return this.prisma.user.findFirst({
+    return this.prisma.client.user.findFirst({
       where: {
         account,
-        deletedAt: null,
       },
     });
   }
 
   async create(registerDto: RegisterDto) {
+    // 這邊使用 raw client (this.prisma.user) 而不是 extended client (this.prisma.client.user)
+    // 是為了能找到包含 soft-deleted 的使用者，以便進行 restore 相關邏輯
     const existingUser = await this.prisma.user.findUnique({
       where: { account: registerDto.account },
     });
 
+    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+    const userData = {
+      ...registerDto,
+      password: hashedPassword,
+      role: Role.USER,
+    };
+
     if (existingUser) {
       if (existingUser.deletedAt) {
-        return this.prisma.user.update({
+        return this.prisma.client.user.update({
           where: { account: registerDto.account },
           data: {
-            ...registerDto,
-            role: Role.USER,
+            ...userData,
             deletedAt: null,
             updatedAt: new Date(),
           },
@@ -40,20 +48,14 @@ export class UsersService {
       throw new ConflictException('帳號已存在');
     }
 
-    return this.prisma.user.create({
-      data: {
-        ...registerDto,
-        role: Role.USER,
-      },
+    return this.prisma.client.user.create({
+      data: userData,
     });
   }
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        id,
-        deletedAt: null,
-      },
+    const user = await this.prisma.client.user.findFirst({
+      where: { id, },
       omit: { password: true },
     });
 
@@ -70,7 +72,6 @@ export class UsersService {
     const limit = queryDto.limit ?? 10;
 
     const where: Prisma.UserWhereInput = {
-      deletedAt: null,
       // 帳號搜尋（模糊搜尋，不區分大小寫）
       ...(queryDto.account && {
         account: {
@@ -96,48 +97,50 @@ export class UsersService {
     };
 
     const [data, total] = await Promise.all([
-      this.prisma.user.findMany({
+      this.prisma.client.user.findMany({
         where,
         skip,
         take,
         omit: { password: true },
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.user.count({ where }),
+      this.prisma.client.user.count({ where }),
     ]);
 
     return createPaginatedResponse(data, page, limit, total);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        id,
-        deletedAt: null,
-      },
+    const user = await this.prisma.client.user.findFirst({
+      where: { id },
     });
 
     if (!user) {
       throw new NotFoundException(`用戶不存在`);
     }
 
-    return this.prisma.user.update({
+    const dataToUpdate = { ...updateUserDto };
+    if (dataToUpdate.password) {
+      dataToUpdate.password = await bcrypt.hash(dataToUpdate.password, 10);
+    }
+
+    return this.prisma.client.user.update({
       where: { id },
-      data: updateUserDto,
+      data: dataToUpdate,
       omit: { password: true },
     });
   }
 
   async remove(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id, deletedAt: null },
+    const user = await this.prisma.client.user.findUnique({
+      where: { id },
     });
 
     if (!user) {
       throw new NotFoundException(`用戶不存在`);
     }
 
-    await this.prisma.user.update({
+    await this.prisma.client.user.update({
       where: { id },
       data: { deletedAt: new Date() },
     });

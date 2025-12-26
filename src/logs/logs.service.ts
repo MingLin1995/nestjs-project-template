@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'nestjs-prisma';
+import { ExtendedPrismaService } from '../common/prisma/extended-prisma.service';
 import { Prisma } from '@prisma/client';
 import { LogQueryDto } from './dto/log-query.dto';
 import { calculatePagination, createPaginatedResponse } from '../common/utils/pagination.helper';
 
 @Injectable()
 export class LogsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: ExtendedPrismaService) { }
 
   async findAll(queryDto: LogQueryDto) {
     const { skip, take } = calculatePagination(queryDto);
@@ -55,33 +55,33 @@ export class LogsService {
       // 時間範圍篩選
       ...(queryDto.startDate &&
         queryDto.endDate && {
-          createdAt: {
-            gte: new Date(queryDto.startDate),
-            lte: new Date(queryDto.endDate),
-          },
-        }),
+        createdAt: {
+          gte: new Date(queryDto.startDate),
+          lte: new Date(queryDto.endDate),
+        },
+      }),
       ...(queryDto.startDate &&
         !queryDto.endDate && {
-          createdAt: {
-            gte: new Date(queryDto.startDate),
-          },
-        }),
+        createdAt: {
+          gte: new Date(queryDto.startDate),
+        },
+      }),
       ...(!queryDto.startDate &&
         queryDto.endDate && {
-          createdAt: {
-            lte: new Date(queryDto.endDate),
-          },
-        }),
+        createdAt: {
+          lte: new Date(queryDto.endDate),
+        },
+      }),
     };
 
     const [data, total] = await Promise.all([
-      this.prisma.systemLog.findMany({
+      this.prisma.client.systemLog.findMany({
         where,
         skip,
         take,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.systemLog.count({ where }),
+      this.prisma.client.systemLog.count({ where }),
     ]);
 
     return createPaginatedResponse(data, page, limit, total);
@@ -91,7 +91,7 @@ export class LogsService {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    const result = await this.prisma.systemLog.deleteMany({
+    const result = await this.prisma.client.systemLog.deleteMany({
       where: {
         createdAt: {
           lt: cutoffDate,
