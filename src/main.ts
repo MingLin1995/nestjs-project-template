@@ -60,11 +60,12 @@ async function bootstrap() {
     .build();
 
   const theme = new SwaggerTheme();
-  const darkCss = theme.getBuffer(SwaggerThemeNameEnum.NORD_DARK);
+  const darkCss = theme.getBuffer(SwaggerThemeNameEnum.DARK);
   const customOptions = {
     customCss: darkCss.toString() + `
     .swagger-ui .title, 
     .swagger-ui .renderedMarkdown p,
+    .swagger-ui .nostyle span,
     .swagger-ui .opblock-summary-description,
     .swagger-ui .parameter__type,
     .swagger-ui .model-box *:not(.star):not(.prop-type):not(.primitive) {
