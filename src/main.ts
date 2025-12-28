@@ -62,7 +62,17 @@ async function bootstrap() {
   const theme = new SwaggerTheme();
   const darkCss = theme.getBuffer(SwaggerThemeNameEnum.NORD_DARK);
   const customOptions = {
-    customCss: darkCss.toString(),
+    customCss: darkCss.toString() + `
+    .swagger-ui .title, 
+    .swagger-ui .renderedMarkdown p,
+    .swagger-ui .opblock-summary-description,
+    .swagger-ui .parameter__type,
+    .swagger-ui .model-box *:not(.star):not(.prop-type):not(.primitive) {
+      color: #fafafa !important;
+    }
+    .swagger-ui .model-box .prop-type {
+      color: #a3be8c !important;
+    }`,
   };
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('apidoc', app, document, customOptions);
