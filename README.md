@@ -23,6 +23,7 @@ NestJS 專案模板，提供開箱即用的身份驗證、用戶管理、角色�
 - **API 文檔** - Swagger 自動生成
 - **Docker 支援** - 開發/生產環境分離
 - **通知系統** - Email/SMS/LINE 整合（可選）
+- **排程任務** - 自動清理過期 Log
 
 ## 技術棧
 
@@ -120,18 +121,26 @@ nestjs-project-template/
 │   │   ├── decorators/            # 自定義裝飾器
 │   │   │   ├── public.decorator.ts   # @Public() - 跳過 JWT
 │   │   │   └── roles.decorator.ts    # @Roles() - 角色權限
+│   │   │   └── api-ok-response-generic.decorator.ts    # @ApiOkResponseGeneric() - API 響應裝飾器
 │   │   ├── dto/                   # 共用資料傳輸物件
 │   │   │   ├── paginated-response.dto.ts
 │   │   │   └── pagination.dto.ts
+│   │   │   └── api-response.dto.ts
+│   │   │   └── message-response.dto.ts
 │   │   ├── filters/               # 例外處理過濾器
 │   │   │   └── http-exception.filter.ts
 │   │   ├── guards/                # 守衛
 │   │   │   └── roles.guard.ts        # 角色權限守衛
 │   │   ├── interceptors/          # 攔截器
-│   │   │   └── logging.interceptor.ts
+│   │   │   ├── logging.interceptor.ts
+│   │   │   └── transform.interceptor.ts
 │   │   ├── logger/                # 客戶端日誌服務
 │   │   │   ├── logger.module.ts
 │   │   │   └── logger.service.ts
+│   │   ├── prisma/                # Prisma 擴充服務
+│   │   │   ├── extended-prisma.service.ts
+│   │   │   ├── prisma.module.ts
+│   │   │   └── extensions/        # Prisma Client 擴充功能 (軟刪除相關邏輯)
 │   │   └── utils/                 # 共用工具函數
 │   │       ├── mask-sensitive.helper.ts
 │   │       └── pagination.helper.ts
@@ -143,6 +152,9 @@ nestjs-project-template/
 │   │   └── dto/
 │   │       ├── log-query.dto.ts
 │   │       └── log-response.dto.ts
+│   │
+│   ├── tasks/                     # 排程任務模組
+│   │   └── log-cleanup.service.ts # 定期清理日誌（清理三十天前的日誌）
 │   │
 │   └── notifications/             # 通知模組（可選）
 │       ├── notifications.module.ts
@@ -238,6 +250,21 @@ async login(@Body() loginDto: LoginDto) {
   return this.authService.login(loginDto);
 }
 ```
+
+### 統一響應格式
+
+系統使用 `TransformInterceptor` 自動將所有 API 回傳資料包裝為統一格式：
+
+```json
+{
+  "statusCode": 200,
+  "message": "Success",
+  "data": { ... }, // 實際回傳的資料
+  "timestamp": "2024-12-25T10:00:00.000+08:00"
+}
+```
+
+**開發注意**：Controller 方法只需回傳 `data` 部分即可，攔截器會自動處理外層結構。
 
 ## 資料庫管理
 
