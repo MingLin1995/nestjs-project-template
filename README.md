@@ -480,6 +480,7 @@ model User {
 
 ## 相關文檔
 
+- [新專案設定指南](./docs/PROJECT_SETUP.md) - **複製此模板後請務必閱讀**，包含 .env 等設定說明
 - [第三方 API Key 申請指南](./docs/API_KEYS_SETUP.md) - Gmail、TapPay、LinePay、Google Maps 等服務申請流程
 
 ## 授權
