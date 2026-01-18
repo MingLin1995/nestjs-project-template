@@ -50,6 +50,7 @@ export class UsersService {
 
     return this.prisma.client.user.create({
       data: userData,
+      omit: { password: true },
     });
   }
 
@@ -146,5 +147,34 @@ export class UsersService {
     });
 
     return { message: '用戶已刪除' };
+  }
+
+  async createRefreshToken(userId: string, token: string, expiresAt: Date, id?: string) {
+    return this.prisma.client.refreshToken.create({
+      data: {
+        ...(id && { id }),
+        userId,
+        token,
+        expiresAt,
+      },
+    });
+  }
+
+  async findRefreshTokenById(id: string) {
+    return this.prisma.client.refreshToken.findUnique({
+      where: { id },
+    });
+  }
+
+  async deleteRefreshToken(id: string) {
+    return this.prisma.client.refreshToken.delete({
+      where: { id },
+    });
+  }
+
+  async deleteUserRefreshTokens(userId: string) {
+    return this.prisma.client.refreshToken.deleteMany({
+      where: { userId },
+    });
   }
 }

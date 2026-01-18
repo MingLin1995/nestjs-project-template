@@ -11,6 +11,7 @@ export interface AuthenticatedUser {
 
 export interface LoginResponse {
   accessToken: string;
+  refreshToken: string;
   user: {
     id: string;
     account: string;
@@ -22,10 +23,12 @@ export interface JwtPayload {
   sub: string;
   account: string;
   role: string;
+  tokenId?: string; // RefreshToken ID
 }
 
 export interface RequestUser {
   sub: string;
   account: string;
   role: string;
+  tokenId?: string;
 }

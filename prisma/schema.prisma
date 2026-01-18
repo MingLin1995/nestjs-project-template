@@ -24,12 +24,26 @@ model User {
   phone      String?
   lineUserId String?
 
+  refreshTokens RefreshToken[]
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // 軟刪除：NULL 表示未刪除，有值表示已刪除
 
   @@index([deletedAt]) // 加速查詢未刪除的用戶
   @@index([account, deletedAt])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   // Hashed Refresh Token
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // 系統日誌
