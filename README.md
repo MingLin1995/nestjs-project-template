@@ -19,11 +19,12 @@ NestJS 專案模板，提供開箱即用的身份驗證、用戶管理、角色�
 - **身份驗證系統** - JWT 認證，全域守衛保護
 - **用戶管理** - CRUD 操作，軟刪除支援
 - **角色權限控制** - 基於裝飾器的 RBAC (Role-Based Access Control)
-- **資料庫 ORM** - Prisma 6.x + PostgreSQL 15
+- **資料庫 ORM** - Prisma 6.x + PostgreSQL 16
+
 - **API 文檔** - Swagger 自動生成
 - **Docker 支援** - 開發/生產環境分離
 - **通知系統** - Email/SMS/LINE 整合（可選）
-- **排程任務** - 自動清理過期 Log
+- **排程任務** - 自動清理過期 Log 與 Token
 
 ## 技術棧
 
@@ -31,7 +32,7 @@ NestJS 專案模板，提供開箱即用的身份驗證、用戶管理、角色�
 | -------- | ---------------------------- |
 | Runtime  | Bun 1.x                      |
 | 框架     | NestJS 10.x + TypeScript 5.x |
-| 資料庫   | PostgreSQL 15 + Prisma 6.x   |
+| 資料庫   | PostgreSQL 16 + Prisma 6.x   |
 | 認證     | JWT + Passport               |
 | API 文檔 | Swagger                      |
 | 容器化   | Docker + Docker Compose      |
@@ -106,8 +107,10 @@ nestjs-project-template/
 │   │   ├── jwt.strategy.ts        # Passport JWT 策略
 │   │   ├── dto/                   # 資料傳輸物件
 │   │   │   └── auth.dto.ts
-│   │   └── interfaces/            # 身份驗證相關介面
-│   │       └── auth.interface.ts
+│   │   ├── interfaces/            # 身份驗證相關介面
+│   │   │   └── auth.interface.ts
+│   │   ├── refresh-token.guard.ts # Refresh Token 守衛
+│   │   └── refresh-token.strategy.ts # Refresh Token 策略
 │   │
 │   ├── users/                     # 用戶管理模組
 │   │   ├── users.controller.ts    # 用戶相關 API 端點
@@ -154,7 +157,7 @@ nestjs-project-template/
 │   │       └── log-response.dto.ts
 │   │
 │   ├── tasks/                     # 排程任務模組
-│   │   └── log-cleanup.service.ts # 定期清理日誌（清理三十天前的日誌）
+│   │   └── cleanup.service.ts     # 定期清理日誌與 Token
 │   │
 │   └── notifications/             # 通知模組（可選）
 │       ├── notifications.module.ts
@@ -190,7 +193,8 @@ nestjs-project-template/
 {
   "sub": "<user-id>",
   "account": "user001",
-  "role": "USER"
+  "role": "USER",
+  "tokenId": "<token-uuid>" // 用於 Refresh Token 輪替機制
 }
 ```
 
@@ -418,6 +422,19 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 - 資料庫不儲存明文密碼
 - 查詢時排除密碼欄位（Prisma `omit`）
 
+### 系統防護
+
+- **Rate Limiting**：全域限制每分鐘 100 次請求 (`ThrottlerModule`)
+- **Security Headers**：使用 `Helmet` 設定安全性標頭
+- **CORS**：可透過環境變數配置允許的來源
+
+### 敏感資料保護
+
+- **Log 隱碼**：系統日誌自動遮罩敏感欄位（如密碼、Token、信用卡號等）
+- **定期清理**：
+  - 每日自動清理 30 天前的 Log
+  - 每日自動清理過期的 Refresh Token
+
 ## 常見問題
 
 ### Q1: 如何重置資料庫？
@@ -476,6 +493,7 @@ model User {
 - `NODE_ENV=production`
 - `DATABASE_URL`（生產資料庫連線）
 - `JWT_SECRET`（強隨機密鑰）
+- `JWT_REFRESH_SECRET`（強隨機密鑰）
 - `ADMIN_ACCOUNT_*` 和 `ADMIN_PASSWORD_*`
 
 ## 相關文檔
