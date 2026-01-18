@@ -5,7 +5,26 @@ import { LoggerService, LogLevel, LogType } from '../logger/logger.service';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  constructor(private logger: LoggerService) {}
+  constructor(private logger: LoggerService) { }
+
+  private sanitize(obj: any): any {
+    if (!obj) return obj;
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this.sanitize(item));
+    }
+    if (typeof obj === 'object') {
+      const sanitized = { ...obj };
+      for (const key in sanitized) {
+        if (['password', 'passwordConfirm', 'token', 'accessToken', 'refreshToken'].includes(key)) {
+          sanitized[key] = '*****';
+        } else {
+          sanitized[key] = this.sanitize(sanitized[key]);
+        }
+      }
+      return sanitized;
+    }
+    return obj;
+  }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
@@ -47,7 +66,7 @@ export class LoggingInterceptor implements NestInterceptor {
               url,
               statusCode,
               duration,
-              requestBody: body,
+              requestBody: this.sanitize(body),
               requestParams: params,
               requestQuery: query,
               clientIp: ip,

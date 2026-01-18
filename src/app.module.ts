@@ -13,7 +13,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LogsModule } from './logs/logs.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-import { LogCleanupService } from './tasks/log-cleanup.service';
+import { CleanupService } from './tasks/cleanup.service';
 import { PrismaModule } from './common/prisma/prisma.module';
 // import { NotificationsModule } from './notifications/notifications.module';
 // 需要的套件：
@@ -30,7 +30,7 @@ import { PrismaModule } from './common/prisma/prisma.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 60 ses
-        limit: 10, // 10 requests
+        limit: 100, // 100 requests (Global Default)
       },
     ]),
     ScheduleModule.forRoot(),
@@ -66,7 +66,7 @@ import { PrismaModule } from './common/prisma/prisma.module';
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
     },
-    LogCleanupService,
+    CleanupService,
   ],
 })
 export class AppModule { }
