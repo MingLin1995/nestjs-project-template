@@ -15,7 +15,7 @@
         "@nestjs/schedule": "^6.1.0",
         "@nestjs/swagger": "^7.4.2",
         "@nestjs/throttler": "^6.4.0",
-        "@prisma/client": "^6.19.2",
+        "@prisma/client": "^7.2.0",
         "axios": "^1.13.2",
         "bcrypt": "^6.0.0",
         "class-transformer": "^0.5.1",
@@ -312,7 +312,9 @@
 
     "@pkgr/core": ["@pkgr/core@0.2.9", "", {}, "sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA=="],
 
-    "@prisma/client": ["@prisma/client@6.19.2", "", { "peerDependencies": { "prisma": "*", "typescript": ">=5.1.0" }, "optionalPeers": ["prisma", "typescript"] }, "sha512-gR2EMvfK/aTxsuooaDA32D8v+us/8AAet+C3J1cc04SW35FPdZYgLF+iN4NDLUgAaUGTKdAB0CYenu1TAgGdMg=="],
+    "@prisma/client": ["@prisma/client@7.2.0", "", { "dependencies": { "@prisma/client-runtime-utils": "7.2.0" }, "peerDependencies": { "prisma": "*", "typescript": ">=5.4.0" }, "optionalPeers": ["prisma", "typescript"] }, "sha512-JdLF8lWZ+LjKGKpBqyAlenxd/kXjd1Abf/xK+6vUA7R7L2Suo6AFTHFRpPSdAKCan9wzdFApsUpSa/F6+t1AtA=="],
+
+    "@prisma/client-runtime-utils": ["@prisma/client-runtime-utils@7.2.0", "", {}, "sha512-dn7oB53v0tqkB0wBdMuTNFNPdEbfICEUe82Tn9FoKAhJCUkDH+fmyEp0ClciGh+9Hp2Tuu2K52kth2MTLstvmA=="],
 
     "@prisma/config": ["@prisma/config@6.19.0", "", { "dependencies": { "c12": "3.1.0", "deepmerge-ts": "7.1.5", "effect": "3.18.4", "empathic": "2.0.0" } }, "sha512-zwCayme+NzI/WfrvFEtkFhhOaZb/hI+X8TTjzjJ252VbPxAl2hWHK5NMczmnG9sXck2lsXrxIZuK524E25UNmg=="],
 
