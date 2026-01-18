@@ -12,10 +12,18 @@ async function bootstrap() {
   // JWT 密碼強度驗證
   if (process.env.NODE_ENV === 'production') {
     const jwtSecret = process.env.JWT_SECRET;
-    const weakSecrets = ['your-secret-key-change-this-in-production'];
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
+    const weakSecrets = [
+      'your-secret-key-change-this-in-production',
+      'your-refresh-secret-key-change-this-in-production',
+    ];
 
     if (!jwtSecret || weakSecrets.includes(jwtSecret) || jwtSecret.length < 32) {
       throw new Error('生產環境必須更換 JWT_SECRET ！');
+    }
+
+    if (!jwtRefreshSecret || weakSecrets.includes(jwtRefreshSecret) || jwtRefreshSecret.length < 32) {
+      throw new Error('生產環境必須更換 JWT_REFRESH_SECRET ！');
     }
   }
 
