@@ -1,7 +1,22 @@
 import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error('DATABASE_URL is not defined');
+}
+
+const pool = new Pool({
+  connectionString,
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
+
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function seedAdminAccounts() {
   console.info('Checking admin accounts seeding status...');
@@ -32,23 +47,34 @@ async function seedAdminAccounts() {
     },
   ];
 
-  for (const admin of defaultAdmins) {
-    const hashedPassword = await bcrypt.hash(admin.password, 10);
-    await prisma.user.create({
+  await prisma.$transaction(async (tx) => {
+    for (const admin of defaultAdmins) {
+      const existingUser = await tx.user.findUnique({
+        where: { account: admin.account },
+      });
+
+      if (existingUser) {
+        console.info(`Admin account ${admin.account} already exists, skipping.`);
+        continue;
+      }
+
+      const hashedPassword = await bcrypt.hash(admin.password, 10);
+      await tx.user.create({
+        data: {
+          account: admin.account,
+          password: hashedPassword,
+          role: 'ADMIN',
+        },
+      });
+      console.info(`Admin account ${admin.account} created successfully.`);
+    }
+
+    await tx.systemConfig.create({
       data: {
-        account: admin.account,
-        password: hashedPassword,
-        role: 'ADMIN',
+        key: 'admin_accounts_setup_completed',
+        value: 'true',
       },
     });
-    console.info(`Admin account ${admin.account} created successfully.`);
-  }
-
-  await prisma.systemConfig.create({
-    data: {
-      key: 'admin_accounts_setup_completed',
-      value: 'true',
-    },
   });
 
   console.info('Admin accounts seeding completed!');
@@ -70,4 +96,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });

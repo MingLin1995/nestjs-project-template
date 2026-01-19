@@ -175,7 +175,7 @@ nestjs-project-template/
 │   └── seed.ts                    # 種子資料（初始化管理員帳號）
 │
 ├── docker-compose.dev.yml         # 開發環境 Docker Compose 配置
-├── docker-compose.yml             # 生產環境 Docker Compose 配置
+├── docker-compose.prod.yml        # 生產環境 Docker Compose 配置
 ├── Dockerfile.dev                 # 開發環境 Dockerfile
 ├── Dockerfile.prod                # 生產環境 Dockerfile
 ├── docker-entrypoint.sh           # 容器啟動腳本
@@ -326,13 +326,13 @@ docker compose -f docker-compose.dev.yml exec app sh
 ./deploy.sh
 
 # 或手動執行
-docker compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.prod.yml up -d --build
 
 # 停止服務
-docker compose -f docker-compose.yml down
+docker compose -f docker-compose.prod.yml down
 
 # 查看 logs
-docker compose -f docker-compose.yml logs -f app
+docker compose -f docker-compose.prod.yml logs -f app
 ```
 
 ## 開發工作流程
@@ -490,11 +490,8 @@ model User {
 
 生產環境必須設定：
 
-- `NODE_ENV=production`
-- `DATABASE_URL`（生產資料庫連線）
 - `JWT_SECRET`（強隨機密鑰）
 - `JWT_REFRESH_SECRET`（強隨機密鑰）
-- `ADMIN_ACCOUNT_*` 和 `ADMIN_PASSWORD_*`
 
 ## 相關文檔
 

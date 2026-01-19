@@ -43,12 +43,11 @@ const config = new DocumentBuilder()
 
 ### 資料庫設定 (PostgreSQL)
 
-| 變數名稱            | 範例值       | 說明                                                                                           |
-| :------------------ | :----------- | :--------------------------------------------------------------------------------------------- |
-| `POSTGRES_USER`     | dev_user     | 資料庫使用者名稱                                                                               |
-| `POSTGRES_PASSWORD` | dev_password | 資料庫密碼                                                                                     |
-| `POSTGRES_DB`       | app_dev      | 資料庫名稱                                                                                     |
-| `DATABASE_URL`      | ...          | **必須與上述設定一致**。格式：`postgresql://<USER>:<PASSWORD>@db:5432/<DB_NAME>?schema=public` |
+| 變數名稱            | 範例值       | 說明             |
+| :------------------ | :----------- | :--------------- |
+| `POSTGRES_USER`     | dev_user     | 資料庫使用者名稱 |
+| `POSTGRES_PASSWORD` | dev_password | 資料庫密碼       |
+| `POSTGRES_DB`       | app_dev      | 資料庫名稱       |
 
 ### 安全性設定
 

@@ -9,9 +9,9 @@ services:
     ports:
       - '${POSTGRES_PORT:-5432}:5432'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
     networks:
-      - app-network
+      - app-network-dev
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-dev_user} -d ${POSTGRES_DB:-app_dev}']
       interval: 5s
@@ -25,23 +25,28 @@ services:
     container_name: ${PROJECT_NAME:-app}-dev
     ports:
       - '${APP_PORT:-3000}:3000'
-      - '9229:9229' # Debug port
+      - '${DEBUG_PORT:-9229}:9229' # Debug port
     env_file:
       - .env
     environment:
       - NODE_ENV=development
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-dev_user}:${POSTGRES_PASSWORD:-dev_password}@db:5432/${POSTGRES_DB:-app_dev}?schema=public
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - .:/app
-      - /app/node_modules
+      - node_modules_dev:/app/node_modules
     networks:
-      - app-network
+      - app-network-dev
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
+    name: ${PROJECT_NAME:-app}_postgres_data_dev
+  node_modules_dev:
+    name: ${PROJECT_NAME:-app}_node_modules_dev
 
 networks:
-  app-network:
+  app-network-dev:
+    name: ${PROJECT_NAME:-app}_network_dev
     driver: bridge

@@ -5,11 +5,8 @@ WORKDIR /app
 RUN apk add --no-cache netcat-openbsd
 
 COPY package.json bun.lock* ./
-
-RUN bun install
-
 COPY prisma ./prisma
-RUN bunx prisma generate
+COPY prisma.config.ts ./
 
 EXPOSE 3000
 
