@@ -1,20 +1,46 @@
 # GEMINI.md - AI Context for NestJS Project Template
 
-## Project Overview
+## Preferred Tools
 
-This is a comprehensive **NestJS Project Template** designed to speed up backend development. It includes pre-built authentication (JWT), user management, role-based access control (RBAC), and database integration with Prisma.
+Use modern CLI tools for better efficiency:
 
-## tech Stack
+| Task                  | Use            | Don't Use             |
+| --------------------- | -------------- | --------------------- |
+| Find files            | `fd`           | `find`, `ls -R`       |
+| Search text           | `rg` (ripgrep) | `grep`, `ag`          |
+| Interactive selection | `fzf`          | Manual filtering      |
+| Process JSON          | `jq`           | `python -m json.tool` |
+
+## Navigation
+
+| Requirement                  | Section   | Description                                   |
+| :--------------------------- | :-------- | :-------------------------------------------- |
+| **Project Overview**         | Section 1 | Goals, tech stack, and structure              |
+| **Dev Workflow**             | Section 2 | Starting env, DB changes, adding modules      |
+| **Design Philosophy**        | Section 3 | Security, maintainability, production-ready   |
+| **Module Deep Dive**         | Section 4 | Auth, Users, Logs, Pagination, Notifications  |
+| **Database Design**          | Section 5 | Schema, migrations, and seeding               |
+| **Collaboration (Required)** | Section 6 | Migration policy, communication, architecture |
+
+---
+
+## 1. Core Information
+
+### 1.1 Overview
+
+This project is a **NestJS 11.x Project Template** designed as an enterprise-grade foundation. It includes full authentication (JWT), Role-Based Access Control (RBAC), audit logging, and database integration.
+
+### 1.2 Tech Stack
 
 - **Runtime**: Bun 1.x
 - **Framework**: NestJS 11.x (TypeScript 5.x)
 - **Database**: PostgreSQL 16
 - **ORM**: Prisma 7.x (v7.2.0)
 - **Authentication**: Passport + JWT
-- **Documentation**: Swagger (Auto-generated)
+- **Documentation**: Swagger (Auto-generated at `/apidoc`)
 - **Containerization**: Docker + Docker Compose
 
-## Repository Structure
+### 1.3 Project Structure
 
 ```
 nestjs-project-template/
@@ -37,86 +63,90 @@ nestjs-project-template/
 └── package.json                   # Scripts and dependencies
 ```
 
-## Key Commands
+---
 
-| Action              | Command                   | Description                          |
-| :------------------ | :------------------------ | :----------------------------------- |
-| **Start Dev**       | `bun run dev`             | Starts app in dev mode (uses Docker) |
-| **Deploy**          | `./deploy.sh`             | Deploys to production                |
-| **Prisma Migrate**  | `bun run prisma:migrate`  | Runs DB migrations during dev        |
-| **Prisma Generate** | `bun run prisma:generate` | Generates Prisma client              |
-| **Test**            | `bun run test`            | Runs unit tests                      |
-| **Lint**            | `bun run lint`            | Runs linter                          |
+## 2. Development Workflow
 
-## Development Workflows
+### 2.1 Starting the Environment
 
-### 1. Starting the Environment
+- **Command**: `bun run dev`
+- **Logic**: Executes `dev.sh`, which cleans old containers and starts the service in `--build` mode.
+- **Agent Note**: Code is mounted via Volumes; hot-reloading happens automatically inside the container.
 
-- **Primary Command**: `bun run dev`
-- **Internal Logic**: Runs `dev.sh`, which stops old containers and starts the dev environment via `docker-compose.dev.yml --build`.
-- **Hot Reload**: Source code is mounted via volumes; changes in `src/` trigger automatic rebuilds within the container.
-
-### 2. Database Changes
+### 2.2 Database Changes
 
 When modifying `prisma/schema.prisma`:
 
 1. Edit the schema file.
-2. Run migration: `docker compose -f docker-compose.dev.yml exec app bunx prisma migrate dev --name <migration_name>`
-3. Restart app if needed (though `bun run dev` usually handles this).
-4. **Agent Tip**: Always use the `manage_database` skill if available.
+2. Provide the migration command to the user (**DO NOT execute automatically**):
+   `docker compose -f docker-compose.dev.yml exec app bunx prisma migrate dev --name <name>`
+3. Run `prisma generate` if needed to sync the Client.
 
-### 3. Adding a New Module
+### 2.3 Adding New Modules
 
-1. Use Nest CLI: `nest g resource <name>` inside the container.
-2. Example: `docker compose -f docker-compose.dev.yml exec app nest g resource items`
+Use Nest CLI inside the container:
+`docker compose -f docker-compose.dev.yml exec app nest g resource items`
 
-### 4. Authentication & Roles
+---
 
-- Use `@Public()` to make an endpoint public.
-- Use `@Roles(Role.ADMIN)` to restrict access to Admins.
-- Current User: Access via `@Request() req` -> `req.user`.
+## 3. Core Design Philosophy
 
-## Critical Patterns & Conventions
+### 3.1 Security & Authentication
 
-### 1. Database & Soft Delete
+- **Global JWT Protection**: All APIs require JWT by default. Use `@Public()` to skip.
+- **Password Safety**: Uses `bcrypt` (10 rounds). Prisma queries automatically `omit` passwords.
+- **RBAC**: Use `@Roles(Role.ADMIN)` to restrict access.
 
-- **Service**: Use `ExtendedPrismaService` (inherited from `PrismaService` but with extensions).
-- **Behavior**: All models with a `deletedAt` field support soft delete.
-- **Rule**: Never use the raw `this.prisma.user.delete()`. The extension automatically converts `delete` and `deleteMany` to `update` with `deletedAt`. Queries automatically filter out `deletedAt !== null`.
+### 3.2 Maintainability
 
-### 2. Unified Response Format
+- **Unified Response**: `TransformInterceptor` wraps all returns. Controllers should only return the `data` portion.
+- **Soft Delete**: Uses `ExtendedPrismaService`. DO NOT use raw `delete()`; mark `deletedAt` instead.
+- **Validation**: Global `ValidationPipe` enforces DTO type checking.
 
-- **Interceptor**: `TransformInterceptor` wraps all controller returns.
-- **Format**: `{ statusCode, message, data, timestamp }`.
-- **Controller Rule**: Simply return the `data`. Do not manually wrap responses unless specifically instructed.
+---
 
-### 3. Validation & DTOs
+## 4. Module Responsibilities
 
-- **Location**: Use `src/<module>/dto/` folders.
-- **Library**: Use `class-validator` and `class-transformer` decorators.
-- **Pipes**: `ValidationPipe` is enabled globally with `whitelist: true` and `forbidNonWhitelisted: true`.
+### 4.1 Authentication (Auth Module)
 
-### 4. Logging
+- **Guard Order**: `JwtAuthGuard` → `RolesGuard` → `Controller`.
+- **Payload**: `{ "sub": "id", "account": "...", "role": "..." }`.
 
-- Use the built-in `LoggerService` for application logs.
-- Request/Error logs are automatically persisted to the `SystemLog` table via `LoggingInterceptor` and `HttpExceptionFilter`.
+### 4.2 System Logging (Logger System)
 
-## How to Work with AI Agents
+- **Dual Channel**: Console (ERROR/WARN) + Database (Auditing).
+- **Smart Interception**: `LoggingInterceptor` automatically records CUD operations, slow requests (>1s), and exceptions.
 
-When asking an agent to perform tasks:
+### 4.3 Request Lifecycle
 
-- **Database**: Use the `manage_database` skill for migrations and seeds.
-- **Context**: The agent should always check `GEMINI.md` before starting a new feature to ensure pattern compliance.
+```
+Middleware → Guard → Interceptor (before) → Pipe → Controller → Service → Interceptor (after) → Filter
+```
 
-## Collaboration Guidelines (Golden Rules)
+---
 
-1.  **Migration Consent**: The agent **MUST NOT** execute database migration commands (`prisma migrate dev`) automatically. Instead, provide the command to the user for manual execution or ask for explicit confirmation before running.
-2.  **Specifications First**: Follow a **Discuss -> Confirm -> Implement** workflow. Always discuss the technical design and specifications with the user first. Start implementation ONLY after the user has confirmed the plan.
-3.  **Consistency & Reuse**: Before creating new utilities or decorators, **ALWAYS** check `src/common/` to see if a similar solution already exists. Maintain a consistent coding style with the rest of the project.
-4.  **Architectural Excellence**:
-    - **SOLID Principles**: Always strive for Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion.
-    - **Decoupling**: Minimize direct dependencies between modules to ensure maintainability.
-    - **Advanced Patterns**: When facing high complexity, prioritize **Clean Architecture** or **Domain-Driven Design (DDD)** patterns—or suggest other superior alternatives—to keep the business logic isolated and testable.
-    - **Future-Proofing**: Avoid "quick fixes" that increase technical debt. Design for long-term maintenance.
-5.  **Proactive Research**: When encountering unfamiliar libraries or complex business logic, the agent **SHOULD** use web search tools to find best practices or clarify requirements before proposing a solution.
-6.  **Maintain Flexibility**: Architecture should serve the project, not just follow a formula. Always be open to better design suggestions that fit the specific context.
+## 5. Database Design Highlights
+
+- **User**: Includes `deletedAt` index for fast soft-delete queries.
+- **SystemLog**: Supports multi-dimensional indexes (level, type, createdAt, userId).
+- **Seed**: Use `prisma/seed.ts` to initialize admins and system configs.
+
+---
+
+## 6. Collaboration Guidelines (Golden Rules) - Agent MUST Follow
+
+### 6.1 Execution Authority
+
+- **Migration Consent**: **STRICTLY PROHIBITED** to execute `prisma migrate dev` automatically. You must provide the command for the user to run or get explicit consent.
+- **Container Context**: All operational commands (nest, prisma, seed) MUST run via `docker compose exec app` inside the container.
+
+### 6.2 Communication & Development Mode
+
+- **Discuss First**: Follow the **Discuss -> Confirm -> Implement** workflow. Propose design specs and get approval before implementation.
+- **Proactive Research**: If unsure about logic or a new package, the Agent **SHOULD** use web search tools to find best practices.
+
+### 6.3 Code Quality
+
+- **Reuse First**: Always check `src/common/` for existing Decorators/DTOs/Helpers before creating new ones.
+- **Architectural Excellence**: Follow **SOLID** and **Decoupling** principles. For complex business logic, proactively recommend **Clean Architecture** or **DDD** patterns.
+- **Flexibility**: Do not be rigid; suggest the most appropriate design pattern based on the project context.

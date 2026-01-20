@@ -12,7 +12,7 @@ This skill allows you to manage the PostgreSQL database for the NestJS applicati
 1.  **Migrate Database**: Apply schema changes to the database.
 2.  **Generate Client**: Regenerate the Prisma Client after schema changes.
 3.  **Seed Database**: Populate the database with initial data (e.g., admin account).
-4.  **Reset Database**: Wipes all data and re-applies migrations/seeds (Use with CAUTION).
+4.  **Reset Database**: Wipes all data and re-applies migrations/seeds (Use with EXTREME CAUTION).
 
 ## Instructions
 
@@ -33,7 +33,7 @@ docker compose -f docker-compose.dev.yml exec app bunx prisma migrate dev --name
 
 ### 2. Generate Client (`prisma:generate`)
 
-Use this if the Prisma Client definitions are out of sync with the schema (often happens after a manual pull or schema edit).
+Use this if the Prisma Client definitions are out of sync with the schema.
 
 ```bash
 docker compose -f docker-compose.dev.yml exec app bunx prisma generate
@@ -49,7 +49,7 @@ docker compose -f docker-compose.dev.yml exec app bun run prisma:seed
 
 ### 4. Reset Database (`prisma:reset`)
 
-**WARNING**: This will DELETE ALL DATA. Use only if you want a fresh start.
+**WARNING**: This will DELETE ALL DATA.
 
 ```bash
 docker compose -f docker-compose.dev.yml exec app bunx prisma migrate reset --force
