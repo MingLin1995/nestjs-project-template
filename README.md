@@ -19,7 +19,7 @@ NestJS 專案模板，提供開箱即用的身份驗證、用戶管理、角色�
 - **身份驗證系統** - JWT 認證，全域守衛保護
 - **用戶管理** - CRUD 操作，軟刪除支援
 - **角色權限控制** - 基於裝飾器的 RBAC (Role-Based Access Control)
-- **資料庫 ORM** - Prisma 6.x + PostgreSQL 16
+- **資料庫 ORM** - Prisma 7.x + PostgreSQL 16
 
 - **API 文檔** - Swagger 自動生成
 - **Docker 支援** - 開發/生產環境分離
@@ -31,8 +31,8 @@ NestJS 專案模板，提供開箱即用的身份驗證、用戶管理、角色�
 | 類別     | 技術                         |
 | -------- | ---------------------------- |
 | Runtime  | Bun 1.x                      |
-| 框架     | NestJS 10.x + TypeScript 5.x |
-| 資料庫   | PostgreSQL 16 + Prisma 6.x   |
+| 框架     | NestJS 11.x + TypeScript 5.x |
+| 資料庫   | PostgreSQL 16 + Prisma 7.x   |
 | 認證     | JWT + Passport               |
 | API 文檔 | Swagger                      |
 | 容器化   | Docker + Docker Compose      |
