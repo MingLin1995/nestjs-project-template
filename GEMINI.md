@@ -71,7 +71,7 @@ nestjs-project-template/
 
 - **Command**: `bun run dev`
 - **Logic**: Executes `dev.sh`, which cleans old containers and starts the service in `--build` mode.
-- **Agent Note**: Code is mounted via Volumes; hot-reloading happens automatically inside the container.
+- **Agent Note**: Code is mounted via Volumes; hot-reloading happens automatically inside the container. This command runs continuously. For further CLI interaction, execute it in the background (e.g., `bun run dev &`).
 
 ### 2.2 Database Changes
 
