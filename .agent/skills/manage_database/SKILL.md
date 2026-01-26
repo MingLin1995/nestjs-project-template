@@ -1,6 +1,7 @@
 ---
 name: manage_database
 description: Manage the application database (migrate, seed, reset) using Prisma.
+workflow: prisma-migration
 ---
 
 # Database Management Skill
