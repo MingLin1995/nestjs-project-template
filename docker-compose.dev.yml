@@ -1,3 +1,5 @@
+name: ${PROJECT_NAME:-app}-dev
+
 services:
   db:
     image: postgres:16-alpine
@@ -17,6 +19,15 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   app:
     build:
@@ -39,6 +50,20 @@ services:
       - node_modules_dev:/app/node_modules
     networks:
       - app-network-dev
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--spider', 'http://localhost:3000/']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
 volumes:
   postgres_data_dev:

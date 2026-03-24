@@ -335,6 +335,30 @@ docker compose -f docker-compose.prod.yml down
 docker compose -f docker-compose.prod.yml logs -f app
 ```
 
+### 資源監控與壓力測試
+
+專案已在 Docker Compose 中設定了 **Log Rotation**（防止日誌塞滿硬碟）及 **Memory Limits**（防止記憶體洩漏拖垮系統）。
+
+#### 1. 即時監控資源
+使用以下指令可以查看所有容器的即時 CPU、記憶體（Memory）使用率：
+```bash
+docker stats
+```
+* **觀察指標**：
+  * **MEM USAGE / LIMIT**：當前使用的記憶體與上限（預設 `app` 1GiB / `db` 512MiB）。
+  * **MEM %**：如果這個數字在日常運行或高壓測試時**長期高於 80%**，或逼近 100%，代表限制開得太小，可能觸發 OOM (Out Of Memory) 導致容器重啟。
+
+#### 2. 進行壓力測試 (Stress Testing)
+上線前建議進行壓力測試，觀察記憶體攀升與回收（GC）狀況。可以使用 `autocannon` 工具：
+```bash
+# 1. 全域安裝工具
+npm install -g autocannon
+
+# 2. 模擬 100 個連線、持續 10 秒的高壓測試
+autocannon -c 100 -d 10 http://localhost:3000/
+```
+* **測試心法**：跑壓測時搭配 `docker stats` 監看記憶體。壓測結束後，記憶體應緩慢回降。如果卡在高點不下來，請檢查是否有 **Memory Leak**。
+
 ## 開發工作流程
 
 ### 新增功能模組
