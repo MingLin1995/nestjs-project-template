@@ -26,7 +26,7 @@ export class TransformInterceptor<T>
                 statusCode: context.switchToHttp().getResponse().statusCode,
                 message: 'Success',
                 data,
-                timestamp: new Date(Date.now() + 8 * 3600 * 1000).toISOString().replace('Z', '+08:00'), // ISO 8601 擴展格式
+                timestamp: new Date().toISOString(),
             })),
         );
     }

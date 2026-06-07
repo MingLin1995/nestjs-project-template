@@ -25,9 +25,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message = exception.message || '內部伺服器錯誤';
     }
 
-    const taipeiTime = new Date().toLocaleString('zh-TW', {
-      timeZone: 'Asia/Taipei',
-    });
+    const timestamp = new Date().toISOString();
 
     const { method, url, ip, headers, body, params, query, user } = request;
     const userAgent = headers['user-agent'] || 'Unknown';
@@ -51,7 +49,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       userId,
       userAccount,
       metadata: {
-        timestamp: taipeiTime,
+        timestamp,
         // 如果是 HttpException，記錄額外的 response 資訊
         ...(exception instanceof HttpException && {
           exceptionResponse: exception.getResponse(),
@@ -62,8 +60,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const errorResponse = {
       statusCode: status,
       message: Array.isArray(message) ? message : [message],
+      data: null,
       error: exception instanceof HttpException ? exception.name : 'Internal Server Error',
-      timestamp: taipeiTime,
+      timestamp,
       path: url,
     };
 

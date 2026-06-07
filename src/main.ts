@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import helmet from 'helmet';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
+import { apiReference } from '@scalar/nestjs-api-reference';
 
 async function bootstrap() {
   // JWT 密碼強度驗證
@@ -57,34 +57,26 @@ async function bootstrap() {
     }),
   );
 
-  const packageJsonPath = path.resolve(__dirname, '../../package.json');
+  const packageJsonPath = path.resolve(process.cwd(), 'package.json');
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
   const config = new DocumentBuilder()
     .setTitle('NestJS Template API')
-    .setDescription('時間格式一率使用 UTC+0，相關判斷由前後端各自處理')
+    .setDescription('時間格式一律使用 UTC+0 (ISO 8601)，相關判斷由前後端各自處理')
     .setVersion(`v${packageJson.version}`)
     .addBearerAuth()
     .build();
 
-  const theme = new SwaggerTheme();
-  const darkCss = theme.getBuffer(SwaggerThemeNameEnum.DARK);
-  const customOptions = {
-    customCss: darkCss.toString() + `
-    .swagger-ui .title, 
-    .swagger-ui .renderedMarkdown p,
-    .swagger-ui .nostyle span,
-    .swagger-ui .opblock-summary-description,
-    .swagger-ui .parameter__type,
-    .swagger-ui .model-box *:not(.star):not(.prop-type):not(.primitive) {
-      color: #fafafa !important;
-    }
-    .swagger-ui .model-box .prop-type {
-      color: #a3be8c !important;
-    }`,
-  };
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('apidoc', app, document, customOptions);
+
+  app.use(
+    '/apidoc',
+    apiReference({
+      spec: {
+        content: document,
+      },
+    }),
+  );
 
   const port = process.env.PORT || 3000; // 對內 port
   const appPort = process.env.APP_PORT || 3000; // 對外 port
@@ -95,7 +87,7 @@ async function bootstrap() {
   console.info('Application is ready');
   console.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.info(`API URL:        http://localhost:${appPort}`);
-  console.info(`Swagger Docs:   http://localhost:${appPort}/apidoc`);
+  console.info(`API Docs:       http://localhost:${appPort}/apidoc (Scalar)`);
   console.info(`Version:        v${packageJson.version}`);
   console.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.info('');

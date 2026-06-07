@@ -3,7 +3,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { ExtendedPrismaService } from '../common/prisma/extended-prisma.service';
 
 @Injectable()
-@Injectable()
 export class CleanupService {
     private readonly logger = new Logger(CleanupService.name);
 

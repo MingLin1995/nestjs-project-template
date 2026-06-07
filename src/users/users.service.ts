@@ -42,6 +42,7 @@ export class UsersService {
             deletedAt: null,
             updatedAt: new Date(),
           },
+          omit: { password: true },
         });
       }
 

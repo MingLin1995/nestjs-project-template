@@ -59,8 +59,16 @@ export class AuthService {
   }
 
   async refreshTokens(userId: string, rt: string): Promise<LoginResponse> {
-    const decoded = this.jwtService.decode(rt) as any;
-    const tokenId = decoded?.tokenId;
+    let payload: any;
+    try {
+      payload = await this.jwtService.verifyAsync(rt, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'your-refresh-secret-key-change-this-in-production',
+      });
+    } catch (error) {
+      throw new ForbiddenException('Invalid or expired refresh token');
+    }
+
+    const tokenId = payload?.tokenId;
 
     if (!tokenId) throw new ForbiddenException('Invalid Token Structure');
 
@@ -73,15 +81,15 @@ export class AuthService {
     // 刪除舊的，建立新的
     await this.usersService.deleteRefreshToken(tokenId);
 
-    const tokens = await this.generateTokens(userId, decoded.account, decoded.role);
+    const tokens = await this.generateTokens(userId, payload.account, payload.role);
 
     return {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       user: {
         id: userId,
-        account: decoded.account,
-        role: decoded.role,
+        account: payload.account,
+        role: payload.role,
       },
     };
   }
@@ -107,12 +115,30 @@ export class AuthService {
       }),
     ]);
 
+    const refreshExpiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
+    const expiresMs = parseDuration(refreshExpiresIn);
     const hash = await bcrypt.hash(rt, 10);
-    await this.usersService.createRefreshToken(userId, hash, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), tokenId); //JWT_REFRESH_EXPIRES_IN 7d
+    await this.usersService.createRefreshToken(userId, hash, new Date(Date.now() + expiresMs), tokenId);
 
     return {
       accessToken: at,
       refreshToken: rt,
     };
+  }
+}
+
+function parseDuration(duration: string): number {
+  const match = duration.match(/^(\d+)([smhd])$/);
+  if (!match) {
+    return 7 * 24 * 60 * 60 * 1000;
+  }
+  const value = parseInt(match[1], 10);
+  const unit = match[2];
+  switch (unit) {
+    case 's': return value * 1000;
+    case 'm': return value * 60 * 1000;
+    case 'h': return value * 60 * 60 * 1000;
+    case 'd': return value * 24 * 60 * 60 * 1000;
+    default: return 7 * 24 * 60 * 60 * 1000;
   }
 }
