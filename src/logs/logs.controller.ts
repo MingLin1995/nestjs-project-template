@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Delete } from '@nestjs/common';
+import { Controller, Get, Query, Delete, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { LogsService } from './logs.service';
 import { LogQueryDto } from './dto/log-query.dto';
@@ -32,6 +32,9 @@ export class LogsController {
   @ApiOkResponseGeneric(CleanupLogResponseDto)
   deleteOldLogs(@Query('days') days?: string) {
     const daysNumber = days ? parseInt(days, 10) : 30;
+    if (isNaN(daysNumber) || daysNumber <= 0) {
+      throw new BadRequestException('清理天數必須是正整數');
+    }
     return this.logsService.deleteOldLogs(daysNumber);
   }
 }

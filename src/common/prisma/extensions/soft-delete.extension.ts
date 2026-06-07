@@ -17,6 +17,10 @@ export const softDeleteExtension = Prisma.defineExtension((client) => {
                         data: { deletedAt: new Date() },
                     });
                 },
+                async count({ args, query }) {
+                    args.where = { deletedAt: null, ...args.where };
+                    return query(args);
+                },
                 async findFirst({ args, query }) {
                     args.where = { deletedAt: null, ...args.where };
                     return query(args);

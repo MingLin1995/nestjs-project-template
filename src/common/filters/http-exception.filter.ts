@@ -15,14 +15,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
       exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
     let message: string;
+    let logMessage = exception.message || '內部伺服器錯誤';
     if (exception instanceof HttpException) {
       const exceptionResponse = exception.getResponse();
       message =
         typeof exceptionResponse === 'string'
           ? exceptionResponse
           : (exceptionResponse as any).message || exception.message;
+      logMessage = message;
     } else {
-      message = exception.message || '內部伺服器錯誤';
+      message = '內部伺服器錯誤';
     }
 
     const timestamp = new Date().toISOString();
@@ -35,7 +37,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     this.logger.log({
       level: LogLevel.ERROR,
       type: LogType.ERROR,
-      message: `[${method}] ${url} - ${message}`,
+      message: `[${method}] ${url} - ${logMessage}`,
       errorType: exception.constructor.name,
       errorStack: exception instanceof Error ? exception.stack : undefined,
       method,
