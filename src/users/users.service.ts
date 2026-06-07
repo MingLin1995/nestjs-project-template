@@ -20,9 +20,7 @@ export class UsersService {
   }
 
   async create(registerDto: RegisterDto) {
-    // 這邊使用 raw client (this.prisma.user) 而不是 extended client (this.prisma.client.user)
-    // 是為了能找到包含 soft-deleted 的使用者，以便進行 restore 相關邏輯
-    const existingUser = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.client.user.findUnique({
       where: { account: registerDto.account },
     });
 
@@ -34,18 +32,6 @@ export class UsersService {
     };
 
     if (existingUser) {
-      if (existingUser.deletedAt) {
-        return this.prisma.client.user.update({
-          where: { account: registerDto.account },
-          data: {
-            ...userData,
-            deletedAt: null,
-            updatedAt: new Date(),
-          },
-          omit: { password: true },
-        });
-      }
-
       throw new ConflictException('帳號已存在');
     }
 
@@ -124,6 +110,7 @@ export class UsersService {
     const dataToUpdate = { ...updateUserDto };
     if (dataToUpdate.password) {
       dataToUpdate.password = await bcrypt.hash(dataToUpdate.password, 10);
+      await this.deleteUserRefreshTokens(id);
     }
 
     return this.prisma.client.user.update({
@@ -142,10 +129,16 @@ export class UsersService {
       throw new NotFoundException(`用戶不存在`);
     }
 
+    const timestamp = Date.now();
     await this.prisma.client.user.update({
       where: { id },
-      data: { deletedAt: new Date() },
+      data: {
+        account: `${user.account}_deleted_${timestamp}`,
+        deletedAt: new Date(),
+      },
     });
+
+    await this.deleteUserRefreshTokens(id);
 
     return { message: '用戶已刪除' };
   }

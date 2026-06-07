@@ -55,21 +55,7 @@ function maskValue(value: any): string {
   if (value === null || value === undefined) {
     return String(value);
   }
-
-  const strValue = String(value);
-
-  // 如果值太短，全部遮罩
-  if (strValue.length <= 4) {
-    return '***';
-  }
-
-  // 保留前後各 2 個字元，中間遮罩
-  const start = strValue.substring(0, 2);
-  const end = strValue.substring(strValue.length - 2);
-  const maskedLength = Math.min(strValue.length - 4, 10); // 最多顯示 10 個星號
-  const masked = '*'.repeat(maskedLength);
-
-  return `${start}${masked}${end}`;
+  return '******';
 }
 
 /**

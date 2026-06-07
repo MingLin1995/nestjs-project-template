@@ -22,7 +22,11 @@ async function bootstrap() {
       throw new Error('生產環境必須更換 JWT_SECRET ！');
     }
 
-    if (!jwtRefreshSecret || weakSecrets.includes(jwtRefreshSecret) || jwtRefreshSecret.length < 32) {
+    if (
+      !jwtRefreshSecret ||
+      weakSecrets.includes(jwtRefreshSecret) ||
+      jwtRefreshSecret.length < 32
+    ) {
       throw new Error('生產環境必須更換 JWT_REFRESH_SECRET ！');
     }
   }
@@ -40,9 +44,13 @@ async function bootstrap() {
   // 是否啟用 CORS
   if (process.env.ENABLE_CORS === 'true') {
     const corsOrigins = process.env.CORS_ORIGINS?.split(',') || '*';
+    const hasWildcard = Array.isArray(corsOrigins)
+      ? corsOrigins.includes('*')
+      : corsOrigins === '*';
+
     app.enableCors({
       origin: corsOrigins,
-      credentials: true,
+      credentials: !hasWildcard,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'], // x-line-userId
     });

@@ -12,7 +12,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   async validateUser(loginDto: LoginDto): Promise<AuthenticatedUser> {
     const user = await this.usersService.findByAccount(loginDto.account);
@@ -62,7 +62,9 @@ export class AuthService {
     let payload: any;
     try {
       payload = await this.jwtService.verifyAsync(rt, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'your-refresh-secret-key-change-this-in-production',
+        secret:
+          this.configService.get<string>('JWT_REFRESH_SECRET') ||
+          'your-refresh-secret-key-change-this-in-production',
       });
     } catch (error) {
       throw new ForbiddenException('Invalid or expired refresh token');
@@ -77,6 +79,13 @@ export class AuthService {
 
     const rtMatches = await bcrypt.compare(rt, tokenRecord.token);
     if (!rtMatches) throw new ForbiddenException('Access Denied');
+
+    // 驗證用戶是否存在且未被軟刪除
+    try {
+      await this.usersService.findOne(userId);
+    } catch (error) {
+      throw new ForbiddenException('Access Denied');
+    }
 
     // 刪除舊的，建立新的
     await this.usersService.deleteRefreshToken(tokenId);
@@ -118,7 +127,12 @@ export class AuthService {
     const refreshExpiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
     const expiresMs = parseDuration(refreshExpiresIn);
     const hash = await bcrypt.hash(rt, 10);
-    await this.usersService.createRefreshToken(userId, hash, new Date(Date.now() + expiresMs), tokenId);
+    await this.usersService.createRefreshToken(
+      userId,
+      hash,
+      new Date(Date.now() + expiresMs),
+      tokenId,
+    );
 
     return {
       accessToken: at,
@@ -135,10 +149,15 @@ function parseDuration(duration: string): number {
   const value = parseInt(match[1], 10);
   const unit = match[2];
   switch (unit) {
-    case 's': return value * 1000;
-    case 'm': return value * 60 * 1000;
-    case 'h': return value * 60 * 60 * 1000;
-    case 'd': return value * 24 * 60 * 60 * 1000;
-    default: return 7 * 24 * 60 * 60 * 1000;
+    case 's':
+      return value * 1000;
+    case 'm':
+      return value * 60 * 1000;
+    case 'h':
+      return value * 60 * 60 * 1000;
+    case 'd':
+      return value * 24 * 60 * 60 * 1000;
+    default:
+      return 7 * 24 * 60 * 60 * 1000;
   }
 }
